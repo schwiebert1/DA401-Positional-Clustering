@@ -6,9 +6,11 @@ Turner Schwiebert's Project for DA401 at Denison University (completed Fall 2022
 
 *STATUS:* offline
 
-*NOTE:* All data collected from: https://fbref.com/en/
+*DATA:* All data collected from: https://fbref.com/en/
 
-## fbref_srape.py:
+## Files:
+
+### fbref_srape.py:
 
 ***Overview:***
 
