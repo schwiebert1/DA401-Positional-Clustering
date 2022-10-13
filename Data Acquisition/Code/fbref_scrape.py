@@ -130,7 +130,7 @@ def PlayerRow(root, info, date):
     try:
         #AGE
         # try:
-        birthSTR = rootSTR.split("""itemprop="birthDate" id="necro-birth" data-birt""")[1].split("h=")[1][1:11]
+        birthSTR = rootSTR.split("""id="necro-birth" data-birt""")[1].split("h=")[1][1:11]
         birth_date = birthSTR.split("-")
         birth = (int(birth_date[0]), int(birth_date[1]), int(birth_date[2]))
         #year, month, day
@@ -319,9 +319,9 @@ today = getDate()
 print(PlayerRow(root = getPlayerRoot(test_tuple), info = test_tuple, date = today))
 
 # GK
-test_tuple = ('Alisson', '7a2e46a8', 'Premier League', 'Liverpool')
-today = getDate()
-print(PlayerRow(root = getPlayerRoot(test_tuple), info = test_tuple, date = today))
+# test_tuple = ('Alisson', '7a2e46a8', 'Premier League', 'Liverpool')
+# today = getDate()
+# print(PlayerRow(root = getPlayerRoot(test_tuple), info = test_tuple, date = today))
 
 
 ## genAge / getDate ##
