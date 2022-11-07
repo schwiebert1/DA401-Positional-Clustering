@@ -239,7 +239,7 @@ def genTables(date = getDate(),
     "https://fbref.com/en/comps/11/stats/Serie-A-Stats",
     "https://fbref.com/en/comps/12/stats/La-Liga-Stats"], 
     ):
-    dest = os.getcwd() + "/Data"
+    dest = os.getcwd() + "/../Data"
     
     prem_list = getPlayerInfo(url_list[0])
     ligue_list = getPlayerInfo(url_list[1])
@@ -294,7 +294,7 @@ def genTables(date = getDate(),
     FULL_df.to_csv(dest + "/players.csv")
 
 # FUNCTION CALL FOR COLLECTION:
-# genTables()
+genTables()
 
 ### TESTING ###
 
@@ -314,9 +314,9 @@ def genTables(date = getDate(),
 ## PlayerRow ##
 
 # Non-GK
-test_tuple = ('Brenden-Aaronson', '5bc43860', 'Premier League', 'Leeds United')
-today = getDate()
-print(PlayerRow(root = getPlayerRoot(test_tuple), info = test_tuple, date = today))
+# test_tuple = ('Brenden-Aaronson', '5bc43860', 'Premier League', 'Leeds United')
+# today = getDate()
+# print(PlayerRow(root = getPlayerRoot(test_tuple), info = test_tuple, date = today))
 
 # GK
 # test_tuple = ('Alisson', '7a2e46a8', 'Premier League', 'Liverpool')
