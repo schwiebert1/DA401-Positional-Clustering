@@ -17,7 +17,7 @@ library(ggplot2)
 library(ggthemes)
 library(ggpubr)
 library(data.table)
-players <- read.csv("../Data Acquisition/Data/players.csv")
+players <- read.csv("../Data Acquisition/Data/players10_20_2022.csv")
 players$height_cm <- as.numeric(as.character(players$height_cm))
 ```
 

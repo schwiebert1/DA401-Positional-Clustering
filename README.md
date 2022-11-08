@@ -2,7 +2,7 @@
 
 ### Introduction
 
-Turner Schwiebert's Project for DA401 at Denison University (completed Fall 2022) first webscraped FBRef to collect physical and performance (per90) data on all football players in Europe's Top 5 Leagues (Premier League, Bundesliga, Ligue 1, Serie A, La Liga) for the past 365 days. Using this performance data, clustering algorithms were used analyze current positional roles in modern soccer. For more specific details on data acquisition and analysis methods, please read below.  
+Turner Schwiebert's Project for DA401 at Denison University (completed Fall 2022) first webscraped FBRef to collect physical and performance (per90) data on all football players in Europe's Top 5 Leagues (Premier League, Bundesliga, Ligue 1, Serie A, La Liga) for the past 365 days. Using this performance data, clustering algorithms were used identify current positional roles in modern soccer. For more specific details on data acquisition and analysis methods, please read below.  
 
 *DATA:* All data collected from: https://fbref.com/en/
 
@@ -26,11 +26,23 @@ Scrapes player names from league's page. Uses that info to build valid URL's for
       - Fullbacks (fullbacks.csv)
       - Centerbacks (centerbacks.csv)
       - Midfielders (midfielders.csv)
-      - Forwards (forwards.csv)
+      - Forwards/Att Mids & Wingers (forwards.csv)
+      
+### Data
+
+As written above, "fbref_scrape.py" outputs 5 csv files. These are saved in the Data folder under Data Acquisition. 
+The webscraper was last run on October 20th, 2022.
+- All positions (players10_20_2022.csv)
+- Fullbacks (fullbacks10_20_2022.csv)
+- Centerbacks (centerbacks10_20_2022.csv)
+- Midfielders (midfielders10_20_2022.csv)
+- Forwards/Att Mids & Wingers (forwards10_20_2022.csv)
 
 ## Analysis:
 
 ### phase1.Rmd
+
+### phase2.Rmd
 
 ***Overview:***
 
