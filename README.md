@@ -31,7 +31,7 @@ Scrapes player names from league's page. Uses that info to build valid URL's for
 ### Data
 
 As written above, "fbref_scrape.py" outputs 5 csv files. These are saved in the Data folder under Data Acquisition. 
-The webscraper was last run on October 20th, 2022.
+The webscraper was last run on October 20th, 2022. For reproducibility of results of this study, these data sets have been renamed from the raw output name. If the webscraper is run, it will output new csv files that do not overwrite the data used for analysis. 
 - All positions (players10_20_2022.csv)
 - Fullbacks (fullbacks10_20_2022.csv)
 - Centerbacks (centerbacks10_20_2022.csv)
