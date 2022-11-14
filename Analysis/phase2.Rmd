@@ -100,6 +100,14 @@ ggplot(data = result, aes(x = as.factor(cluster), y = mean, fill = variable_name
   labs(title = "Forwards - Summary Statistics by Cluster", y = "Mean Values", x = "Cluster")
 ```
 
+## Write Clusters to CSV
+```{r}
+# write.csv(filter(forwards_clust, k_cluster == 1), "Clusters/Forwards/forwards_cluster1")
+# write.csv(filter(forwards_clust, k_cluster == 2), "Clusters/Forwards/forwards_cluster2")
+# write.csv(filter(forwards_clust, k_cluster == 3), "Clusters/Forwards/forwards_cluster3")
+```
+
+
 # Att Mid/Wings
 
 ## Clustering
@@ -165,6 +173,14 @@ ggplot(data = result, aes(x = as.factor(cluster), y = mean, fill = variable_name
   labs(title = "Attacking Mids/Wingers - Summary Statistics by Cluster", y = "Mean Values", x = "Cluster")
 ```
 
+## Write Clusters to CSV
+```{r}
+# write.csv(filter(AMW_clust, k_cluster == 1), "Clusters/AttMids_Wings/attMids_Wings_cluster1")
+# write.csv(filter(AMW_clust, k_cluster == 2), "Clusters/AttMids_Wings/attMids_Wings_cluster2")
+# write.csv(filter(AMW_clust, k_cluster == 3), "Clusters/AttMids_Wings/attMids_Wings_cluster3")
+# write.csv(filter(AMW_clust, k_cluster == 4), "Clusters/AttMids_Wings/attMids_Wings_cluster4")
+```
+
 # Midfielders
 
 ## Clustering
@@ -217,7 +233,7 @@ for(i in 1:(length(vars)*n_clust)){
 filter(Mid_clust, k_cluster == 1)
 
 #insert values into table row by row:
-filter(result, variable_name == vars[9])
+filter(result, variable_name == vars[1])
 
 #analyze table of resulting summary statistics
 result
@@ -228,6 +244,15 @@ ggplot(data = result, aes(x = as.factor(cluster), y = mean, fill = variable_name
   geom_bar(stat = "identity", position = "dodge")+
   theme_minimal()+
   labs(title = "Midfielders - Summary Statistics by Cluster", y = "Mean Values", x = "Cluster")
+```
+
+## Write Clusters to CSV
+```{r}
+# write.csv(filter(Mid_clust, k_cluster == 1), "Clusters/Midfielders/midfielders_cluster1.csv")
+# write.csv(filter(Mid_clust, k_cluster == 2), "Clusters/Midfielders/midfielders_cluster2.csv")
+# write.csv(filter(Mid_clust, k_cluster == 3), "Clusters/Midfielders/midfielders_cluster3.csv")
+# write.csv(filter(Mid_clust, k_cluster == 4), "Clusters/Midfielders/midfielders_cluster4.csv")
+# write.csv(filter(Mid_clust, k_cluster == 5), "Clusters/Midfielders/midfielders_cluster5.csv")
 ```
 
 # Fullbacks
@@ -281,7 +306,7 @@ for(i in 1:(length(vars)*n_clust)){
 filter(fullB_clust, k_cluster == 1)
 
 #insert values into table row by row:
-filter(result, variable_name == vars[9])
+filter(result, variable_name == vars[1])
 
 #analyze table of resulting summary statistics
 result
@@ -292,6 +317,14 @@ ggplot(data = result, aes(x = as.factor(cluster), y = mean, fill = variable_name
   geom_bar(stat = "identity", position = "dodge")+
   theme_minimal()+
   labs(title = "Fullbacks - Summary Statistics by Cluster", y = "Mean Values", x = "Cluster")
+```
+
+## Write Clusters to CSV
+```{r}
+# write.csv(filter(fullB_clust, k_cluster == 1), "Clusters/Fullbacks/fullbacks_cluster1.csv")
+# write.csv(filter(fullB_clust, k_cluster == 2), "Clusters/Fullbacks/fullbacks_cluster2.csv")
+# write.csv(filter(fullB_clust, k_cluster == 3), "Clusters/Fullbacks/fullbacks_cluster3.csv")
+# write.csv(filter(fullB_clust, k_cluster == 4), "Clusters/Fullbacks/fullbacks_cluster4.csv")
 ```
 
 # Centerbacks
@@ -358,7 +391,11 @@ ggplot(data = result, aes(x = as.factor(cluster), y = mean, fill = variable_name
   labs(title = "Center Backs - Summary Statistics by Cluster", y = "Mean Values", x = "Cluster")
 ```
 
-
+## Write Clusters to CSV
+```{r}
+# write.csv(filter(CB_clust, k_cluster == 1), "Clusters/Centerbacks/centerbacks_cluster1.csv")
+# write.csv(filter(CB_clust, k_cluster == 2), "Clusters/Centerbacks/centerbacks_cluster2.csv")
+```
 
 
 
