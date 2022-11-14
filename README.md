@@ -38,7 +38,7 @@ The webscraper was last run on October 20th, 2022. For reproducibility of result
 - Midfielders (midfielders10_20_2022.csv)
 - Forwards/Att Mids & Wingers (forwards10_20_2022.csv)
 
-## Analysis:
+## Positional Analysis:
 
 ### phase1.Rmd
 

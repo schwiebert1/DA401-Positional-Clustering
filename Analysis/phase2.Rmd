@@ -1,0 +1,370 @@
+---
+title: "phase2"
+author: "Turner Schwiebert"
+date: "11/3/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, warning=F}
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(data.table)
+library(caret)
+
+forwards <- read.csv("../Data Acquisition/Data/forwards10_20_2022.csv")
+
+attmids_wings <- forwards %>% filter(position == "Att Mid / Wing")
+attmids_wings$height_cm <- as.numeric(as.character(attmids_wings$height_cm))
+
+forwards <- forwards %>% filter(position == "Forward")
+forwards$height_cm <- as.numeric(as.character(forwards$height_cm))
+
+centerbacks <- read.csv("../Data Acquisition/Data/centerbacks10_20_2022.csv")
+centerbacks$height_cm <- as.numeric(as.character(centerbacks$height_cm))
+
+fullbacks <- read.csv("../Data Acquisition/Data/fullbacks10_20_2022.csv")
+fullbacks$height_cm <- as.numeric(as.character(fullbacks$height_cm))
+
+midfielders <- read.csv("../Data Acquisition/Data/midfielders10_20_2022.csv")
+midfielders$height_cm <- as.numeric(as.character(midfielders$height_cm))
+```
+
+# NOTE: the clusters are reproducible, but re-running caret's kmeans changes the order of clusters. Thus, results are reproducible but the order is somewhat random.
+
+# Forwards
+
+## Clustering
+
+```{r, use hierarchical dendrogram to pick number of clusters, only include relevant features}
+forward_dendrogram <- hclust(dist(forwards[, c("Aerials.won", "Players.Dribbled.Past", "Touches..Mid.3rd.", "Touches..Att.3rd.", "Crosses", "Shots.Total", "Ball.Recoveries", "Shot.Creating.Actions")]))
+plot(forward_dendrogram)
+```
+3 clusters looks good
+
+```{r, use k-means to create clusters}
+forwards_clust <- forwards
+kFit = kmeans(forwards[,c("Aerials.won", "Players.Dribbled.Past", "Touches..Mid.3rd.", "Touches..Att.3rd.", "Crosses", "Shots.Total", "Ball.Recoveries", "Shot.Creating.Actions")], 3, nstart=50)
+forwards_clust$k_cluster <- kFit$cluster
+```
+
+## Validation/Reporting
+
+```{r}
+vars = c("Aerials.won", "Players.Dribbled.Past", "Touches..Mid.3rd.", "Touches..Att.3rd.", "Crosses", "Shots.Total", "Ball.Recoveries", "Shot.Creating.Actions")
+n_clust = 3
+result <- data.frame(cluster = numeric(length(vars)*n_clust),
+           variable_name = character(length(vars)*n_clust),
+           mean = numeric(length(vars)*n_clust),
+           sd = numeric(length(vars)*n_clust),
+           total_mean = numeric(length(vars)*n_clust),
+           total_sd = numeric(length(vars)*n_clust),
+           count = numeric(length(vars)*n_clust))
+
+cur_clust = 1
+cur_var = 1
+
+#IF THIS FOR LOOP THROWS AN ERROR, JUST RUN THE CHUNK AGAIN (I dont know why but it works)
+for(i in 1:(length(vars)*n_clust)){
+  result$cluster[i] = cur_clust
+  result$variable_name[i] = vars[cur_var]
+  result$mean[i] = round(mean(filter(forwards_clust, k_cluster == cur_clust)[,vars[cur_var]]), 2)
+  result$sd[i] = round(sd(filter(forwards_clust, k_cluster == cur_clust)[,vars[cur_var]]), 2)
+  result$total_mean[i] = round(mean(forwards_clust[,vars[cur_var]]), 2)
+  result$total_sd[i] = round(sd(forwards_clust[,vars[cur_var]]), 2)
+  result$count[i] = nrow(filter(forwards_clust, k_cluster == cur_clust))
+  cur_var = cur_var + 1
+  if(cur_var > length(vars)){
+    cur_var = 1
+    cur_clust = cur_clust + 1}
+}
+
+#view players in individual cluster
+filter(forwards_clust, k_cluster == 1)
+
+#insert values into table row by row:
+filter(result, variable_name == vars[1])
+
+#view players in individual cluster
+result
+```
+
+```{r}
+ggplot(data = result, aes(x = as.factor(cluster), y = mean, fill = variable_name)) +
+  geom_bar(stat = "identity", position = "dodge")+
+  theme_minimal()+
+  labs(title = "Forwards - Summary Statistics by Cluster", y = "Mean Values", x = "Cluster")
+```
+
+# Att Mid/Wings
+
+## Clustering
+
+```{r, use hierarchical dendrogram to pick number of clusters, only include relevant features}
+AMW_dendrogram <- hclust(dist(attmids_wings[, c("Players.Dribbled.Past", "Touches..Mid.3rd.", "Touches..Att.3rd.", "Crosses", "Shots.Total", "Ball.Recoveries", "Shot.Creating.Actions", "Progressive.Passes")]))
+plot(AMW_dendrogram)
+```
+4 clusters looks good
+
+```{r, use k-means to create clusters}
+AMW_clust <- attmids_wings
+kFit = kmeans(attmids_wings[,c("Players.Dribbled.Past", "Touches..Mid.3rd.", "Touches..Att.3rd.", "Crosses", "Shots.Total", "Ball.Recoveries", "Shot.Creating.Actions", "Progressive.Passes")], 4, nstart=50)
+AMW_clust$k_cluster <- kFit$cluster
+```
+
+## Validation/Reporting
+
+```{r}
+vars = c("Players.Dribbled.Past", "Touches..Mid.3rd.", "Touches..Att.3rd.", "Crosses", "Shots.Total", "Ball.Recoveries", "Shot.Creating.Actions", "Progressive.Passes")
+n_clust = 4
+
+result <- data.frame(cluster = numeric(length(vars)*n_clust),
+           variable_name = character(length(vars)*n_clust),
+           mean = numeric(length(vars)*n_clust),
+           sd = numeric(length(vars)*n_clust),
+           total_mean = numeric(length(vars)*n_clust),
+           total_sd = numeric(length(vars)*n_clust),
+           count = numeric(length(vars)*n_clust))
+
+cur_clust = 1
+cur_var = 1
+
+#IF THIS FOR LOOP THROWS AN ERROR, JUST RUN THE CHUNK AGAIN (I dont know why but it works)
+for(i in 1:(length(vars)*n_clust)){
+  result$cluster[i] = cur_clust
+  result$variable_name[i] = vars[cur_var]
+  result$mean[i] = round(mean(filter(AMW_clust, k_cluster == cur_clust)[,vars[cur_var]]), 2)
+  result$sd[i] = round(sd(filter(AMW_clust, k_cluster == cur_clust)[,vars[cur_var]]), 2)
+  result$total_mean[i] = round(mean(AMW_clust[,vars[cur_var]]), 2)
+  result$total_sd[i] = round(sd(AMW_clust[,vars[cur_var]]), 2)
+  result$count[i] = nrow(filter(AMW_clust, k_cluster == cur_clust))
+  cur_var = cur_var + 1
+  if(cur_var > length(vars)){
+    cur_var = 1
+    cur_clust = cur_clust + 1}
+}
+
+#view players in individual cluster
+filter(AMW_clust, k_cluster == 3)
+
+#insert values into table:
+filter(result, variable_name == vars[1])
+
+#analyze resulting summary statistics
+result
+```
+
+```{r}
+ggplot(data = result, aes(x = as.factor(cluster), y = mean, fill = variable_name)) +
+  geom_bar(stat = "identity", position = "dodge")+
+  theme_minimal()+
+  labs(title = "Attacking Mids/Wingers - Summary Statistics by Cluster", y = "Mean Values", x = "Cluster")
+```
+
+# Midfielders
+
+## Clustering
+
+```{r, use hierarchical dendrogram to pick number of clusters, only include relevant features}
+Mid_dendrogram <- hclust(dist(midfielders[, c("Players.Dribbled.Past", "Touches..Def.3rd.", "Touches..Mid.3rd.", "Touches..Att.3rd.", "Crosses", "Shots.Total", "Ball.Recoveries", "Shot.Creating.Actions", "Progressive.Passes")]))
+plot(Mid_dendrogram)
+```
+5 clusters looks good, midfielders are used many ways in the sport
+
+```{r, use k-means to create clusters}
+Mid_clust <- midfielders
+kFit = kmeans(Mid_clust[,c("Players.Dribbled.Past", "Touches..Def.3rd.", "Touches..Mid.3rd.", "Touches..Att.3rd.", "Crosses", "Shots.Total", "Ball.Recoveries", "Shot.Creating.Actions", "Progressive.Passes")], 5, nstart=50)
+Mid_clust$k_cluster <- kFit$cluster
+```
+
+## Validation/Reporting
+
+```{r}
+vars = c("Players.Dribbled.Past", "Touches..Def.3rd.", "Touches..Mid.3rd.", "Touches..Att.3rd.", "Crosses", "Shots.Total", "Ball.Recoveries", "Shot.Creating.Actions", "Progressive.Passes")
+n_clust = 5
+
+result <- data.frame(cluster = numeric(length(vars)*n_clust),
+           variable_name = character(length(vars)*n_clust),
+           mean = numeric(length(vars)*n_clust),
+           sd = numeric(length(vars)*n_clust),
+           total_mean = numeric(length(vars)*n_clust),
+           total_sd = numeric(length(vars)*n_clust),
+           count = numeric(length(vars)*n_clust))
+
+cur_clust = 1
+cur_var = 1
+
+#IF THIS FOR LOOP THROWS AN ERROR, JUST RUN THE CHUNK AGAIN (I dont know why but it works)
+for(i in 1:(length(vars)*n_clust)){
+  result$cluster[i] = cur_clust
+  result$variable_name[i] = vars[cur_var]
+  result$mean[i] = round(mean(filter(Mid_clust, k_cluster == cur_clust)[,vars[cur_var]]), 2)
+  result$sd[i] = round(sd(filter(Mid_clust, k_cluster == cur_clust)[,vars[cur_var]]), 2)
+  result$total_mean[i] = round(mean(Mid_clust[,vars[cur_var]]), 2)
+  result$total_sd[i] = round(sd(Mid_clust[,vars[cur_var]]), 2)
+  result$count[i] = nrow(filter(Mid_clust, k_cluster == cur_clust))
+  cur_var = cur_var + 1
+  if(cur_var > length(vars)){
+    cur_var = 1
+    cur_clust = cur_clust + 1}
+}
+
+#view players in individual cluster
+filter(Mid_clust, k_cluster == 1)
+
+#insert values into table row by row:
+filter(result, variable_name == vars[9])
+
+#analyze table of resulting summary statistics
+result
+```
+
+```{r}
+ggplot(data = result, aes(x = as.factor(cluster), y = mean, fill = variable_name)) +
+  geom_bar(stat = "identity", position = "dodge")+
+  theme_minimal()+
+  labs(title = "Midfielders - Summary Statistics by Cluster", y = "Mean Values", x = "Cluster")
+```
+
+# Fullbacks
+
+## Clustering
+
+```{r, use hierarchical dendrogram to pick number of clusters, only include relevant features}
+FullB_dendrogram <- hclust(dist(fullbacks[, c("Players.Dribbled.Past", "Touches..Def.3rd.", "Touches..Mid.3rd.", "Touches..Att.3rd.", "Crosses", "Shots.Total", "Ball.Recoveries", "Shot.Creating.Actions", "Progressive.Passes")]))
+plot(FullB_dendrogram)
+```
+4 clusters looks good
+
+```{r, use k-means to create clusters}
+fullB_clust <- fullbacks
+kFit = kmeans(fullB_clust[,c("Players.Dribbled.Past", "Touches..Def.3rd.", "Touches..Mid.3rd.", "Touches..Att.3rd.", "Crosses", "Shots.Total", "Ball.Recoveries", "Shot.Creating.Actions", "Progressive.Passes")], 4, nstart=50)
+fullB_clust$k_cluster <- kFit$cluster
+```
+
+## Validation/Reporting
+
+```{r}
+vars = c("Players.Dribbled.Past", "Touches..Def.3rd.", "Touches..Mid.3rd.", "Touches..Att.3rd.", "Crosses", "Shots.Total", "Ball.Recoveries", "Shot.Creating.Actions", "Progressive.Passes")
+n_clust = 4
+result <- data.frame(cluster = numeric(length(vars)*n_clust),
+           variable_name = character(length(vars)*n_clust),
+           mean = numeric(length(vars)*n_clust),
+           sd = numeric(length(vars)*n_clust),
+           total_mean = numeric(length(vars)*n_clust),
+           total_sd = numeric(length(vars)*n_clust),
+           count = numeric(length(vars)*n_clust))
+
+cur_clust = 1
+cur_var = 1
+
+#IF THIS FOR LOOP THROWS AN ERROR, JUST RUN THE CHUNK AGAIN (I dont know why but it works)
+for(i in 1:(length(vars)*n_clust)){
+  result$cluster[i] = cur_clust
+  result$variable_name[i] = vars[cur_var]
+  result$mean[i] = round(mean(filter(fullB_clust, k_cluster == cur_clust)[,vars[cur_var]]), 2)
+  result$sd[i] = round(sd(filter(fullB_clust, k_cluster == cur_clust)[,vars[cur_var]]), 2)
+  result$total_mean[i] = round(mean(fullB_clust[,vars[cur_var]]), 2)
+  result$total_sd[i] = round(sd(fullB_clust[,vars[cur_var]]), 2)
+  result$count[i] = nrow(filter(fullB_clust, k_cluster == cur_clust))
+  cur_var = cur_var + 1
+  if(cur_var > length(vars)){
+    cur_var = 1
+    cur_clust = cur_clust + 1}
+}
+
+#view players in individual cluster
+filter(fullB_clust, k_cluster == 1)
+
+#insert values into table row by row:
+filter(result, variable_name == vars[9])
+
+#analyze table of resulting summary statistics
+result
+```
+
+```{r}
+ggplot(data = result, aes(x = as.factor(cluster), y = mean, fill = variable_name)) +
+  geom_bar(stat = "identity", position = "dodge")+
+  theme_minimal()+
+  labs(title = "Fullbacks - Summary Statistics by Cluster", y = "Mean Values", x = "Cluster")
+```
+
+# Centerbacks
+
+## Clustering
+
+```{r, use hierarchical dendrogram to pick number of clusters, only include relevant features}
+CB_dendrogram <- hclust(dist(centerbacks[, c("Aerials.won", "Touches..Def.3rd.", "Touches..Mid.3rd.", "Touches..Att.3rd.", "Shots.Total", "Ball.Recoveries", "Progressive.Passes")]))
+plot(CB_dendrogram)
+```
+2 clusters looks good, centerbacks are only used defensively in today's game
+
+```{r, use k-means to create clusters}
+CB_clust <- centerbacks
+kFit = kmeans(CB_clust[,c("Aerials.won", "Touches..Def.3rd.", "Touches..Mid.3rd.", "Touches..Att.3rd.", "Shots.Total", "Ball.Recoveries", "Progressive.Passes")], 2, nstart=50)
+CB_clust$k_cluster <- kFit$cluster
+```
+
+## Validation/Reporting
+
+```{r}
+vars = c("Aerials.won", "Touches..Def.3rd.", "Touches..Mid.3rd.", "Touches..Att.3rd.", "Shots.Total", "Ball.Recoveries", "Progressive.Passes")
+n_clust = 2
+result <- data.frame(cluster = numeric(length(vars)*n_clust),
+           variable_name = character(length(vars)*n_clust),
+           mean = numeric(length(vars)*n_clust),
+           sd = numeric(length(vars)*n_clust),
+           total_mean = numeric(length(vars)*n_clust),
+           total_sd = numeric(length(vars)*n_clust),
+           count = numeric(length(vars)*n_clust))
+
+cur_clust = 1
+cur_var = 1
+
+#IF THIS FOR LOOP THROWS AN ERROR, JUST RUN THE CHUNK AGAIN (I dont know why but it works)
+for(i in 1:(length(vars)*n_clust)){
+  result$cluster[i] = cur_clust
+  result$variable_name[i] = vars[cur_var]
+  result$mean[i] = round(mean(filter(CB_clust, k_cluster == cur_clust)[,vars[cur_var]]), 2)
+  result$sd[i] = round(sd(filter(CB_clust, k_cluster == cur_clust)[,vars[cur_var]]), 2)
+  result$total_mean[i] = round(mean(CB_clust[,vars[cur_var]]), 2)
+  result$total_sd[i] = round(sd(CB_clust[,vars[cur_var]]), 2)
+  result$count[i] = nrow(filter(CB_clust, k_cluster == cur_clust))
+  cur_var = cur_var + 1
+  if(cur_var > length(vars)){
+    cur_var = 1
+    cur_clust = cur_clust + 1}
+}
+
+#view players in individual cluster
+filter(CB_clust, k_cluster == 1)
+
+#insert values into table row by row:
+filter(result, variable_name == vars[1])
+
+#analyze table of resulting summary statistics
+result
+```
+
+```{r}
+ggplot(data = result, aes(x = as.factor(cluster), y = mean, fill = variable_name)) +
+  geom_bar(stat = "identity", position = "dodge")+
+  theme_minimal()+
+  labs(title = "Center Backs - Summary Statistics by Cluster", y = "Mean Values", x = "Cluster")
+```
+
+
+
+
+
+
+
+
+
+
+
