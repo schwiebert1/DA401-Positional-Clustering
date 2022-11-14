@@ -42,7 +42,17 @@ The webscraper was last run on October 20th, 2022. For reproducibility of result
 
 ### phase1.Rmd
 
+Contains phase 1 of this research project: analysis of positional roles using all FBRef performance data pooled together. See "Methods" section of the Final Paper for more details.
+There is no outut for this .Rmd file. 
+
 ### phase2.Rmd
 
-***Overview:***
+Contains phase 2 of this research project: analysis of positional roles using FBRef performance data broken up by traditional positions as defined by FBRef. 
+These positions include Forwards, Attacking Midfielders/Wingers, Midfielders, Fullbacks, and Center Backs. 
+This file outputs the actual clusters contained in the "Clusters" folder of the "Analysis" folder. For more information on the findings contained in these clusters, run this file and see the Results and Discussion section of the Final Paper. 
+
+## Writing Assignments:
+
+This folder contains the writing assignments due at various points of the Fall 2022 semester for DA 401: the capstone course for the Data Analytics Department at Denison University. 
+
 
