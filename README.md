@@ -4,7 +4,7 @@
 
 Turner Schwiebert's Project for DA401 at Denison University (completed Fall 2022) first webscraped FBRef to collect physical and performance (per90) data on all football players in Europe's Top 5 Leagues (Premier League, Bundesliga, Ligue 1, Serie A, La Liga) for the past 365 days. Using this performance data, clustering algorithms were used identify current positional roles in modern soccer. For more specific details on data acquisition and analysis methods, please read below.  
 
-*DATA:* All data collected from: https://fbref.com/en/
+All data collected from: https://fbref.com/en/
 
 ## Data Acquisition:
 
@@ -12,7 +12,9 @@ Turner Schwiebert's Project for DA401 at Denison University (completed Fall 2022
 
 ***Overview:***
 
-Scrapes player names from league's page. Uses that info to build valid URL's for each player. Collects per90 stats from each player's adavnced stats page. Compiles stats into data frames. Writes data frames to csv files.
+Scrapes player names from league's page. Uses that info to build valid URL's for each player. Collects per90 stats from each player's adavnced stats page. Compiles stats into data frames. Writes data frames to csv files. 
+
+The run time for this file was about 56 minutes on my MacBook. This file requires Google Chrome installed and an up to date Google Chrome webdriver, which can be found here: https://chromedriver.chromium.org/downloads
 
 ***Functions:***
 
