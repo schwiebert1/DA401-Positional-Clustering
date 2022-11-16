@@ -53,8 +53,4 @@ Contains phase 2 of this research project: analysis of positional roles using FB
 These positions include Forwards, Attacking Midfielders/Wingers, Midfielders, Fullbacks, and Center Backs. 
 This file outputs the actual clusters contained in the "Clusters" folder of the "Analysis" folder. For more information on the findings contained in these clusters, run this file and see the Results and Discussion section of the Final Paper. 
 
-## Writing Assignments:
-
-This folder contains the writing assignments due at various points of the Fall 2022 semester for DA 401: the capstone course for the Data Analytics Department at Denison University. 
-
 

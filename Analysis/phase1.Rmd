@@ -9,7 +9,14 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Data
+OVERVIEW:
+- Reads in data
+- Views all variables
+- Clusters using all players and all variables
+- Clusters using all players with positional variables 
+
+
+## Data
 
 ```{r}
 library(dplyr)
@@ -21,105 +28,110 @@ library(caret)
 players <- read.csv("../Data Acquisition/Data/players10_20_2022.csv")
 players$height_cm <- as.numeric(as.character(players$height_cm))
 
-# view all variables (there are 146, 136 of which are potentially relevant to analysis)
+# view all variables (there are 146, 133 of which are potentially relevant to analysis)
 str(players[1:99])
 str(players[100:146])
 ```
 
-# No Feature Selection
-
 ## Clustering - All Variables
 
 ```{r, clustering all players using all raw variables}
-clusters <- hclust(dist(players[, c(20:146)]))
+clusters <- hclust(dist(players[, c(13:145)]))
 plot(clusters)
-#best cut seems to be 14 based on dendrogram
-firstcut <- cutree(clusters, 14)
-table(players$position, firstcut)
+#best cut seems to be 17 based on dendrogram
 
-kFit = kmeans(players_clust[,c(20:146)], 14, nstart=50)
+players_clust <- players %>% na.omit() 
+#some of the variables have missing data, which breaks kmeans clustering. Thus, NA's are ommitted (another disadvantage of using all 133 variables)
+kFit = kmeans(players_clust[,c(13:145)], 17, nstart=50, iter.max = 20)
 players_clust$k_cluster <- kFit$cluster
 ```
 
-Almost impossible to interpret these clusters due to the high dimensionality of the raw data - going through 130+ variables is not a good use of time. Plus, the positions being clustered together make no sense. 
-
-```{r, positional prevalence visuals}
+```{r, positional prevalence visuals for all variables}
 positions = c("Att Mid / Wing", "Center Back", "Forward", "Fullback", "Midfielder")
 
-plots <- lapply(1:18, function(x) ggplot(filter(players_clust2,cluster == x), aes(x = position)) +
-    geom_bar(fill = "black", width = 0.7)+
-    theme_base()+
-    theme(text =element_text(size = 15), axis.text.x = element_text(size = 13))+
-    labs(x = "Position", y = "Count", title = sprintf("Cluster %s", x)))
-figure1234 <- ggarrange(plots[[1]], plots[[2]], plots[[3]], plots[[4]], nrow = 2, ncol = 2)
-figure5678 <- ggarrange(plots[[5]], plots[[6]], plots[[7]], plots[[8]], nrow = 2, ncol = 2)
-figure9101112 <- ggarrange(plots[[9]], plots[[10]], plots[[11]], plots[[12]], nrow = 2, ncol = 2)
-figure1314 <- ggarrange(plots[[13]], plots[[14]], nrow = 2, ncol = 2)
-figure1234
-figure5678
-figure9101112
-figure1314
+# sets up counts of each position by cluster for barplot
+counts <- as.data.frame(table(players_clust$position, players_clust$k_cluster))
+counts <- counts %>% rename(Position = Var1, Cluster = Var2, Count = Freq)
+
+#view in viewer for a better plot
+ggplot(data = counts, aes(x = as.factor(Cluster), y = Count, fill = Position)) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.8)+
+  theme_minimal()+
+  theme(text = element_text(size = 25))+
+  labs(title = "F1", x = "Cluster")
 ```
 
-## Clustering -
+Almost impossible to interpret these clusters due to the high dimensionality of the raw data - going through 130+ variables is not a good use of time. Plus, the positions being clustered together make no sense. However, some analysis of prevalence of traditional position can be found below. 
+
+## Clustering - With Relevant Features
 
 ```{r, clustering all players using "positional" variables}
-clusters <- hclust(dist(players[, c("Touches..Def.3rd.", "Touches..Mid.3rd.", "Touches..Att.3rd.", "Crosses", "Total.Shots", "Aerials.won", "Ball.Recoveries", "Shot.Creating.Actions")]))
+clusters <- hclust(dist(players[, c("Touches..Def.3rd.", "Touches..Mid.3rd.", "Touches..Att.3rd.", "Crosses", "Shots.Total", "Aerials.won", "Ball.Recoveries", "Shot.Creating.Actions", "Players.Dribbled.Past", "Progressive.Passes")]))
 plot(clusters)
-#best cut seems to be 18 based on dendrogram
-firstcut <- cutree(clusters, 18)
-table(players$position, firstcut)
-cluster_prev <- table(players$position, firstcut)
+#best cut seems to be 16 based on dendrogram
+
 players_clust2 <- players
-players_clust2$cluster <- firstcut
-filter(players_clust2, cluster == 1)
+kFit = kmeans(players_clust2[,c("Touches..Def.3rd.", "Touches..Mid.3rd.", "Touches..Att.3rd.", "Crosses", "Shots.Total", "Aerials.won", "Ball.Recoveries", "Shot.Creating.Actions", "Players.Dribbled.Past", "Progressive.Passes")], 16, nstart=50, iter.max = 20)
+#no na.omit this time because of the feature selection
+players_clust2$k_cluster <- kFit$cluster
 ```
 
-```{r}
-filter(players_clust2, cluster == 7)
-```
-
-
-## Visuals
-
-```{r, prevalence of a few indicators with visuals}
-xG_vec = numeric(14)
-DT_vec = numeric(14)
-for(i in 1:14){
-  xG_vec[i] = mean(filter(players_clust, players_clust$cluster==i)$xG)
-  DT_vec[i] = mean(filter(players_clust, players_clust$cluster==i)$Dribblers.Tackled)
-}
-#xG is offensive,
-#dribbers taclked is defensive
-barplot(xG_vec ~ c(1:14), xlab = "Cluster", ylab= "Expected Goals", main = "xG per 90 by Cluster")
-barplot(DT_vec ~ c(1:14), xlab = "Cluster", ylab= "Dribblers Tackled", main = "Dribblers Tackled per 90 by Cluster")
-```
-
-```{r, positional prevalence visuals}
+```{r, positional prevalence visuals for all variables}
 positions = c("Att Mid / Wing", "Center Back", "Forward", "Fullback", "Midfielder")
 
-plots <- lapply(1:18, function(x) ggplot(filter(players_clust2,cluster == x), aes(x = position)) +
-    geom_bar(fill = "black", width = 0.7)+
-    theme_base()+
-    theme(text =element_text(size = 15), axis.text.x = element_text(size = 13))+
-    labs(x = "Position", y = "Count", title = sprintf("Cluster %s", x)))
-figure1234 <- ggarrange(plots[[1]], plots[[2]], plots[[3]], plots[[4]], nrow = 2, ncol = 2)
-figure5678 <- ggarrange(plots[[5]], plots[[6]], plots[[7]], plots[[8]], nrow = 2, ncol = 2)
-figure9101112 <- ggarrange(plots[[9]], plots[[10]], plots[[11]], plots[[12]], nrow = 2, ncol = 2)
-figure1314 <- ggarrange(plots[[13]], plots[[14]], nrow = 2, ncol = 2)
-figure1234
-figure5678
-figure9101112
-figure1314
+# sets up counts of each position by cluster for barplot
+counts <- as.data.frame(table(players_clust2$position, players_clust2$k_cluster))
+counts <- counts %>% rename(Position = Var1, Cluster = Var2, Count = Freq)
+
+#view in viewer for a better plot
+ggplot(data = counts, aes(x = as.factor(Cluster), y = Count, fill = Position)) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.8)+
+  theme_minimal()+
+  theme(text = element_text(size = 25))+
+  labs(title = "F2", x = "Cluster")
 ```
 
-# based on these clusters, there is very little interpretability without feature selection.
+Still impossible to interpret due to many players at positions that do not do the same things being clustered together. Thus, feature selection and stratification by position is required to reveal positional roles. This is done in phase 2. 
 
-```{r, begin investigating within position}
-p <- ggplot(data = players, aes(x = Crosses, y = Dribblers.Tackled)) + geom_point()
-p + facet_wrap(~position) + labs(title = "Dribblers Tackled vs. Expected Goals (per 90 minutes) by Position", y = "Dribblers Tackled per 90", 
-                                 x = "Expected Goals per 90")
-```
+# preliminary Visuals
+
+# ```{r, prevalence of a few indicators with visuals}
+# xG_vec = numeric(14)
+# DT_vec = numeric(14)
+# for(i in 1:14){
+#   xG_vec[i] = mean(filter(players_clust, players_clust$cluster==i)$xG)
+#   DT_vec[i] = mean(filter(players_clust, players_clust$cluster==i)$Dribblers.Tackled)
+# }
+# #xG is offensive,
+# #dribbers taclked is defensive
+# barplot(xG_vec ~ c(1:14), xlab = "Cluster", ylab= "Expected Goals", main = "xG per 90 by Cluster")
+# barplot(DT_vec ~ c(1:14), xlab = "Cluster", ylab= "Dribblers Tackled", main = "Dribblers Tackled per 90 by Cluster")
+# ```
+# 
+# ```{r, positional prevalence visuals}
+# positions = c("Att Mid / Wing", "Center Back", "Forward", "Fullback", "Midfielder")
+# 
+# plots <- lapply(1:18, function(x) ggplot(filter(players_clust2,cluster == x), aes(x = position)) +
+#     geom_bar(fill = "black", width = 0.7)+
+#     theme_base()+
+#     theme(text =element_text(size = 15), axis.text.x = element_text(size = 13))+
+#     labs(x = "Position", y = "Count", title = sprintf("Cluster %s", x)))
+# figure1234 <- ggarrange(plots[[1]], plots[[2]], plots[[3]], plots[[4]], nrow = 2, ncol = 2)
+# figure5678 <- ggarrange(plots[[5]], plots[[6]], plots[[7]], plots[[8]], nrow = 2, ncol = 2)
+# figure9101112 <- ggarrange(plots[[9]], plots[[10]], plots[[11]], plots[[12]], nrow = 2, ncol = 2)
+# figure1314 <- ggarrange(plots[[13]], plots[[14]], nrow = 2, ncol = 2)
+# figure1234
+# figure5678
+# figure9101112
+# figure1314
+# ```
+# 
+# 
+# ```{r, begin investigating within position}
+# p <- ggplot(data = players, aes(x = Crosses, y = Dribblers.Tackled)) + geom_point()
+# p + facet_wrap(~position) + labs(title = "Dribblers Tackled vs. Expected Goals (per 90 minutes) by Position", y = "Dribblers Tackled per 90", 
+#                                  x = "Expected Goals per 90")
+# ```
 
 
 
